@@ -1,6 +1,6 @@
 {
   "name": "@drkmattrlabs/copilot-init",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Smart context management and automated workflows for GitHub Copilot CLI",
   "main": "src/index.js",
   "bin": {
