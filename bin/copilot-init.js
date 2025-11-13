@@ -6,13 +6,14 @@ const setup = require('../src/commands/setup');
 const wizard = require('../src/commands/wizard');
 const status = require('../src/commands/status');
 const detect = require('../src/commands/detect');
+const { version } = require('../package.json');
 
 const program = new Command();
 
 program
   .name('copilot-init')
   .description('Smart context management and automated workflows for GitHub Copilot CLI')
-  .version('1.0.2');
+  .version(version);
 
 program
   .command('setup')
