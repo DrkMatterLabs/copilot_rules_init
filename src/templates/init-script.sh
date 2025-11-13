@@ -239,11 +239,11 @@ load_project_context() {
 
     # Write cache file for persistence across sessions
     cat > "$COPILOT_CACHE_FILE" <<EOF
-COPILOT_PROJECT=$COPILOT_PROJECT
-COPILOT_PROJECT_TYPE=$project_type
-COPILOT_PROJECT_ROOT=$project_root
-COPILOT_LAST_PWD=$PWD
-CACHED_AT=$(date '+%Y-%m-%d %H:%M:%S')
+COPILOT_PROJECT="$COPILOT_PROJECT"
+COPILOT_PROJECT_TYPE="$project_type"
+COPILOT_PROJECT_ROOT="$project_root"
+COPILOT_LAST_PWD="$PWD"
+CACHED_AT="$(date '+%Y-%m-%d %H:%M:%S')"
 EOF
 
     return 0

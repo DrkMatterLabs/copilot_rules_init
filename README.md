@@ -2,7 +2,7 @@
 
 > **Smart context management and automated workflows for GitHub Copilot CLI**
 
-Automatically detect your project structure, load the right context, and automate your development workflows across Next.js, Rails, and full-stack projects.
+Automatically detect your project structure, create custom GitHub Copilot agents, and automate your development workflows across Next.js, Rails, and full-stack projects.
 
 [![npm version](https://img.shields.io/npm/v/@drkmattrlabs/copilot_init.svg)](https://www.npmjs.com/package/@drkmattrlabs/copilot_init)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -11,9 +11,10 @@ Automatically detect your project structure, load the right context, and automat
 
 ## ✨ Features
 
+- 🤖 **GitHub Copilot CLI Integration** - Automatically generates custom agents for your projects
 - 🎯 **Auto-Detection** - Automatically identifies Next.js, Rails, and full-stack projects
 - 🏗️ **Monorepo Support** - Detects separate frontend/backend directories
-- 🧙 **Interactive Wizard** - Answer a few questions, get a complete configuration
+- 🧙 **Interactive Wizard** - Answer a few questions, get complete configuration + custom agent
 - 🔄 **Dynamic Context** - Context switches automatically when you change projects
 - 🚀 **Automated Workflows** - Build → Test → PR → Merge workflows for Next.js and Rails
 - 💾 **Persistent Context** - Maintains context while working in the same project
@@ -93,6 +94,50 @@ That's it! 🎉
 
 ## 🎯 How It Works
 
+### Generated Files
+
+When you run the wizard or detect command, **two configuration files** are created:
+
+#### 1. `.copilot-rules.json` (Shell Context)
+This file is used by the shell integration to:
+- Set environment variables for your project
+- Configure automated workflows (autobuild, automerge)
+- Define project-specific commands and context
+
+#### 2. `.github/agents/project.md` (GitHub Copilot CLI Agent)
+This is a **custom agent profile** for GitHub Copilot CLI that:
+- Provides project-specific context to Copilot
+- Includes technology stack information
+- Defines coding standards and best practices
+- Guides Copilot on project structure and workflows
+
+**Example structure:**
+```
+~/Projects/my-app/
+├── .copilot-rules.json          ← Shell context & workflows
+├── .github/
+│   └── agents/
+│       └── project.md           ← GitHub Copilot CLI agent
+├── src/
+└── ...
+```
+
+### Using Your Custom Agent with GitHub Copilot CLI
+
+Once configured, you can use your custom agent:
+
+```bash
+# Ask Copilot about your project
+gh copilot --agent=project "How should I structure a new feature?"
+
+# Get project-specific guidance
+gh copilot --agent=project "Review this API endpoint code"
+
+# Copilot will use your project's context and standards
+```
+
+The agent is **automatically available** to GitHub Copilot CLI - no additional setup needed!
+
 ### Automatic Project Detection
 
 When you `cd` into a directory, Copilot Init:
@@ -112,13 +157,16 @@ When you `cd` into a directory, Copilot Init:
 
 ```
 ~/Projects/my-erp/               → Full-Stack context
+├── .copilot-rules.json          → Shell workflows & context
+├── .github/
+│   └── agents/
+│       └── project.md           → Copilot CLI agent
 ├── frontend/                    → Next.js context (when in this dir)
 │   ├── next.config.js
 │   └── ...
-├── backend/                     → Rails context (when in this dir)
-│   ├── Gemfile
-│   └── ...
-└── .copilot-rules.json         → Project configuration
+└── backend/                     → Rails context (when in this dir)
+    ├── Gemfile
+    └── ...
 ```
 
 ---
@@ -260,14 +308,41 @@ copilot-init detect
 
 ## 🤔 FAQ
 
-### Do I need GitHub Copilot to use this?
+### Do I need GitHub Copilot CLI to use this?
 
-No! While designed to complement GitHub Copilot CLI, this tool provides:
-- Project context management
+No! This tool provides value in two ways:
+
+**Without GitHub Copilot CLI:**
+- Project context management (shell environment variables)
 - Automated build/test/PR workflows
-- Multi-project support
+- Multi-project support with automatic context switching
+- Shell functions for common tasks
 
-It's useful for any developer working across multiple projects.
+**With GitHub Copilot CLI:**
+- All of the above, PLUS:
+- Custom agents automatically configured for each project
+- Project-specific guidance from Copilot
+- Tech stack-aware code suggestions
+- Workflow-aware recommendations
+
+### How does this integrate with GitHub Copilot CLI?
+
+When you run `copilot-init wizard` or `copilot-init detect`, it creates `.github/agents/project.md` - a custom agent profile.
+
+GitHub Copilot CLI (if installed) **automatically detects** this file and makes your custom agent available. You can then use:
+
+```bash
+gh copilot --agent=project "your question"
+```
+
+The agent has context about:
+- Your project type (Next.js, Rails, etc.)
+- Technology stack
+- Project structure (monorepo, frontend/backend locations)
+- Development workflow preferences
+- Coding standards and best practices
+
+This means Copilot gives you **project-specific** guidance instead of generic answers!
 
 ### What shells are supported?
 

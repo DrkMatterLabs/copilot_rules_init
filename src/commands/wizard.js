@@ -7,6 +7,7 @@ const { detectProjectStructure } = require('../detectors/monorepo');
 const { detectNextJs } = require('../detectors/nextjs');
 const { detectRails } = require('../detectors/rails');
 const { generateConfig } = require('../generators/config-generator');
+const { generateAgentProfile } = require('../generators/agent-generator');
 
 async function wizard() {
   console.log(chalk.cyan.bold('\n🪄  Project Setup Wizard'));
@@ -132,8 +133,8 @@ async function wizard() {
     }
   ]);
 
-  // Generate configuration
-  const config = generateConfig({
+  // Generate configurations
+  const configData = {
     projectName: answers.projectName,
     projectType: answers.projectType,
     domain,
@@ -145,23 +146,49 @@ async function wizard() {
       autoBuild,
       targetBranch: 'main'
     }
-  });
+  };
 
-  // Save configuration
+  const config = generateConfig(configData);
+  const agentProfile = generateAgentProfile(configData);
+
+  // Save configurations
   const configPath = path.join(cwd, '.copilot-rules.json');
-  const saveSpinner = ora('Generating configuration...').start();
+  const agentsDir = path.join(cwd, '.github', 'agents');
+  const agentPath = path.join(agentsDir, 'project.md');
+
+  const saveSpinner = ora('Generating configuration files...').start();
 
   try {
+    // Save .copilot-rules.json for shell context
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-    saveSpinner.succeed('Configuration saved to .copilot-rules.json');
+    saveSpinner.text = 'Created .copilot-rules.json';
+
+    // Create .github/agents directory and save custom agent
+    if (!fs.existsSync(agentsDir)) {
+      fs.mkdirSync(agentsDir, { recursive: true });
+    }
+    fs.writeFileSync(agentPath, agentProfile);
+    saveSpinner.succeed('Configuration files created successfully');
 
     console.log(chalk.green.bold('\n✓ Setup complete!'));
-    console.log(chalk.gray('\nNext steps:'));
-    console.log(chalk.gray('  1. Review .copilot-rules.json (optional)'));
-    console.log(chalk.gray('  2. Commit it to git: git add .copilot-rules.json'));
-    console.log(chalk.gray('  3. Reload context: source ~/.zshrc'));
-    console.log(chalk.gray('  4. Check status: copilot_status'));
-    console.log(chalk.gray('\nAutomated workflows available:'));
+    console.log(chalk.green('\nGenerated files:'));
+    console.log(chalk.gray('  ✓ .copilot-rules.json') + chalk.dim(' (shell context)'));
+    console.log(chalk.gray('  ✓ .github/agents/project.md') + chalk.dim(' (GitHub Copilot CLI agent)'));
+
+    console.log(chalk.cyan('\n📋 Next steps:'));
+    console.log(chalk.gray('  1. Review the generated files (optional)'));
+    console.log(chalk.gray('  2. Commit to git:'));
+    console.log(chalk.cyan('     git add .copilot-rules.json .github/agents/'));
+    console.log(chalk.cyan('     git commit -m "chore: add copilot configuration"'));
+    console.log(chalk.gray('  3. Reload shell context: ') + chalk.cyan('source ~/.zshrc'));
+    console.log(chalk.gray('  4. Check context status: ') + chalk.cyan('copilot_status'));
+
+    console.log(chalk.cyan('\n🤖 Using with GitHub Copilot CLI:'));
+    console.log(chalk.gray('  The custom agent will be automatically available.'));
+    console.log(chalk.gray('  To use it explicitly:'));
+    console.log(chalk.cyan('  gh copilot --agent=project "your question"'));
+
+    console.log(chalk.cyan('\n⚡ Automated workflows available:'));
     console.log(chalk.cyan('  • autobuild_next') + chalk.gray(' - Next.js build → PR workflow'));
     console.log(chalk.cyan('  • automerge_rails') + chalk.gray(' - Rails test → PR workflow'));
     console.log(chalk.cyan('  • autobuild_fullstack') + chalk.gray(' - Full-stack workflow\n'));

@@ -6,6 +6,7 @@ const { detectProjectStructure } = require('../detectors/monorepo');
 const { detectNextJs } = require('../detectors/nextjs');
 const { detectRails } = require('../detectors/rails');
 const { generateConfig } = require('../generators/config-generator');
+const { generateAgentProfile } = require('../generators/agent-generator');
 
 async function detect() {
   console.log(chalk.cyan.bold('\n🔍 Auto-Detecting Project Configuration'));
@@ -48,8 +49,8 @@ async function detect() {
       techStack.push(hasRails.version || 'Ruby on Rails');
     }
 
-    // Generate config
-    const config = generateConfig({
+    // Generate configurations
+    const configData = {
       projectName,
       projectType: structure.suggestedType,
       domain: 'Auto-detected project',
@@ -64,10 +65,15 @@ async function detect() {
         autoBuild: true,
         targetBranch: 'main'
       }
-    });
+    };
 
-    // Save config
+    const config = generateConfig(configData);
+    const agentProfile = generateAgentProfile(configData);
+
+    // Check if files exist
     const configPath = path.join(cwd, '.copilot-rules.json');
+    const agentsDir = path.join(cwd, '.github', 'agents');
+    const agentPath = path.join(agentsDir, 'project.md');
 
     if (fs.existsSync(configPath)) {
       console.log(chalk.yellow('\n⚠ .copilot-rules.json already exists'));
@@ -75,12 +81,26 @@ async function detect() {
       return;
     }
 
-    const saveSpinner = ora('Generating configuration...').start();
+    // Save configurations
+    const saveSpinner = ora('Generating configuration files...').start();
+
+    // Save .copilot-rules.json
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-    saveSpinner.succeed('Configuration saved to .copilot-rules.json');
+    saveSpinner.text = 'Created .copilot-rules.json';
+
+    // Create .github/agents directory and save custom agent
+    if (!fs.existsSync(agentsDir)) {
+      fs.mkdirSync(agentsDir, { recursive: true });
+    }
+    fs.writeFileSync(agentPath, agentProfile);
+    saveSpinner.succeed('Configuration files created successfully');
 
     console.log(chalk.green.bold('\n✓ Auto-detection complete!'));
-    console.log(chalk.gray('\nGenerated configuration:'));
+    console.log(chalk.green('\nGenerated files:'));
+    console.log(chalk.gray('  ✓ .copilot-rules.json') + chalk.dim(' (shell context)'));
+    console.log(chalk.gray('  ✓ .github/agents/project.md') + chalk.dim(' (GitHub Copilot CLI agent)'));
+
+    console.log(chalk.cyan('\nDetected configuration:'));
     console.log(chalk.gray(`  Type: ${structure.suggestedType}`));
     console.log(chalk.gray(`  Tech: ${techStack.join(', ')}`));
 
@@ -90,10 +110,12 @@ async function detect() {
       if (structure.backendDir) console.log(chalk.gray(`    Backend: ${structure.backendDir}/`));
     }
 
-    console.log(chalk.gray('\nNext steps:'));
-    console.log(chalk.gray('  1. Review .copilot-rules.json (customize if needed)'));
-    console.log(chalk.gray('  2. Reload context: source ~/.zshrc'));
-    console.log(chalk.gray('  3. Check status: copilot_status\n'));
+    console.log(chalk.cyan('\n📋 Next steps:'));
+    console.log(chalk.gray('  1. Review the generated files (customize if needed)'));
+    console.log(chalk.gray('  2. Commit to git:'));
+    console.log(chalk.cyan('     git add .copilot-rules.json .github/agents/'));
+    console.log(chalk.gray('  3. Reload shell context: ') + chalk.cyan('source ~/.zshrc'));
+    console.log(chalk.gray('  4. Check status: ') + chalk.cyan('copilot_status\n'));
 
   } catch (error) {
     spinner.fail('Detection failed');
