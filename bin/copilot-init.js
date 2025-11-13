@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name('copilot-init')
   .description('Smart context management and automated workflows for GitHub Copilot CLI')
-  .version('1.0.0');
+  .version('1.0.2');
 
 program
   .command('setup')
