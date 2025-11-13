@@ -2,11 +2,6 @@
   "version": "1.0.0",
   "author": "Rafael Delgado",
   "description": "Advanced GitHub Copilot CLI configuration with dynamic project context loading",
-
-  // =============================================================================
-  // GLOBAL DEFAULTS
-  // =============================================================================
-  // These settings apply when no project-specific config is found
   "defaults": {
     "context": {
       "developer": "Rafael Delgado",
@@ -19,11 +14,7 @@
         "Git feature branch workflow"
       ]
     },
-
-    // Default system prompt for all projects
     "system_prompt": "You are an expert Full-Stack Development assistant for Rafael Delgado. You specialize in Ruby on Rails backends and Next.js frontends. Always:\n- Write production-ready, secure code\n- Follow RESTful conventions for Rails APIs\n- Use TypeScript for Next.js projects\n- Include error handling and validation\n- Suggest tests when appropriate\n- Follow the project's existing patterns and conventions\n- Explain complex decisions briefly\n- Never make destructive changes without confirmation",
-
-    // Commands that can run without explicit user approval
     "approved_commands": [
       "git status",
       "git diff",
@@ -40,8 +31,6 @@
       "pwd",
       "tree -L 2 -I 'node_modules|tmp|log'"
     ],
-
-    // Restricted commands that require explicit approval
     "restricted_commands": [
       "git push --force",
       "rm -rf",
@@ -50,11 +39,6 @@
       "git reset --hard"
     ]
   },
-
-  // =============================================================================
-  // PROJECT DETECTION RULES
-  // =============================================================================
-  // These patterns help identify what kind of project we're in
   "project_detection": {
     "nextjs": {
       "markers": ["next.config.js", "next.config.mjs", "next.config.ts", "pages/", "app/"],
@@ -86,11 +70,6 @@
       }
     }
   },
-
-  // =============================================================================
-  // KNOWN PROJECTS
-  // =============================================================================
-  // Pre-configured settings for specific projects Rafael works on
   "projects": {
     "erp_drkmattr": {
       "path_patterns": [
@@ -116,7 +95,6 @@
         "target_branch": "main"
       }
     },
-
     "totalcargo": {
       "path_patterns": [
         "**/TotalCargo/**",
@@ -140,11 +118,6 @@
       }
     }
   },
-
-  // =============================================================================
-  // AUTOMATION WORKFLOWS
-  // =============================================================================
-  // Define automated workflows for different project types
   "workflows": {
     "nextjs_autobuild": {
       "name": "Next.js Auto-Build and PR",
@@ -186,7 +159,6 @@
       "enabled": false,
       "requires_approval": true
     },
-
     "rails_automerge": {
       "name": "Rails Test and Auto-merge",
       "description": "Test → Create Branch → Commit → Push → PR → Auto-merge",
@@ -228,39 +200,23 @@
       "requires_approval": true
     }
   },
-
-  // =============================================================================
-  // BEHAVIOR SETTINGS
-  // =============================================================================
   "behavior": {
-    // Persist context while in the same directory
     "persist_context": true,
     "context_timeout": 3600,
-
-    // Automatically load project-specific .copilot-rules.json if present
     "load_local_config": true,
     "local_config_filenames": [".copilot-rules.json", ".copilot-rules.yaml", ".copilot.json"],
-
-    // Safety features
     "safety": {
       "require_confirmation_for_destructive": true,
       "prevent_force_push_to_main": true,
       "backup_before_major_changes": true,
       "dry_run_mode": false
     },
-
-    // Logging and debugging
     "logging": {
       "enabled": true,
       "log_file": "~/.copilot_cli.log",
       "log_level": "info"
     }
   },
-
-  // =============================================================================
-  // EXTENSION SYSTEM
-  // =============================================================================
-  // Instructions for adding new projects
   "extension_guide": {
     "description": "To add a new project, create a .copilot-rules.json file in the project root",
     "minimal_config_example": {

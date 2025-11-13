@@ -18,18 +18,24 @@ async function setup() {
 
   // Check if already installed
   if (fs.existsSync(initScriptPath)) {
-    const { overwrite } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'overwrite',
-        message: 'Copilot Init is already installed. Overwrite?',
-        default: false
-      }
-    ]);
+    // Only prompt if in interactive terminal
+    if (process.stdin.isTTY) {
+      const { overwrite } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'overwrite',
+          message: 'Copilot Init is already installed. Overwrite?',
+          default: false
+        }
+      ]);
 
-    if (!overwrite) {
-      console.log(chalk.yellow('\n✓ Setup cancelled'));
-      return;
+      if (!overwrite) {
+        console.log(chalk.yellow('\n✓ Setup cancelled'));
+        return;
+      }
+    } else {
+      // Non-interactive mode: overwrite by default
+      console.log(chalk.yellow('✓ Existing installation found, overwriting...'));
     }
   }
 
