@@ -1,0 +1,281 @@
+{
+  "version": "1.0.0",
+  "author": "Rafael Delgado",
+  "description": "Advanced GitHub Copilot CLI configuration with dynamic project context loading",
+
+  // =============================================================================
+  // GLOBAL DEFAULTS
+  // =============================================================================
+  // These settings apply when no project-specific config is found
+  "defaults": {
+    "context": {
+      "developer": "Rafael Delgado",
+      "experience_level": "Full-Stack Developer",
+      "specializations": ["Ruby on Rails", "Next.js", "TypeScript", "PostgreSQL"],
+      "preferred_patterns": [
+        "RESTful API design",
+        "Component-based architecture",
+        "Test-driven development",
+        "Git feature branch workflow"
+      ]
+    },
+
+    // Default system prompt for all projects
+    "system_prompt": "You are an expert Full-Stack Development assistant for Rafael Delgado. You specialize in Ruby on Rails backends and Next.js frontends. Always:\n- Write production-ready, secure code\n- Follow RESTful conventions for Rails APIs\n- Use TypeScript for Next.js projects\n- Include error handling and validation\n- Suggest tests when appropriate\n- Follow the project's existing patterns and conventions\n- Explain complex decisions briefly\n- Never make destructive changes without confirmation",
+
+    // Commands that can run without explicit user approval
+    "approved_commands": [
+      "git status",
+      "git diff",
+      "git log --oneline -10",
+      "git branch",
+      "npm run build",
+      "npm run test",
+      "bundle exec rails test",
+      "bundle exec rspec",
+      "rails db:migrate:status",
+      "npm list --depth=0",
+      "bundle list",
+      "ls -la",
+      "pwd",
+      "tree -L 2 -I 'node_modules|tmp|log'"
+    ],
+
+    // Restricted commands that require explicit approval
+    "restricted_commands": [
+      "git push --force",
+      "rm -rf",
+      "rails db:drop",
+      "npm run deploy",
+      "git reset --hard"
+    ]
+  },
+
+  // =============================================================================
+  // PROJECT DETECTION RULES
+  // =============================================================================
+  // These patterns help identify what kind of project we're in
+  "project_detection": {
+    "nextjs": {
+      "markers": ["next.config.js", "next.config.mjs", "next.config.ts", "pages/", "app/"],
+      "package_indicators": ["next", "react"],
+      "context_additions": {
+        "framework": "Next.js",
+        "build_command": "npm run build",
+        "test_command": "npm test",
+        "dev_command": "npm run dev"
+      }
+    },
+    "rails": {
+      "markers": ["Gemfile", "config/application.rb", "app/models", "config/routes.rb"],
+      "package_indicators": ["rails"],
+      "context_additions": {
+        "framework": "Ruby on Rails",
+        "build_command": "bundle install",
+        "test_command": "bundle exec rails test",
+        "dev_command": "rails server"
+      }
+    },
+    "fullstack_rails_nextjs": {
+      "markers": ["Gemfile", "next.config.js", "tires_erp/"],
+      "context_additions": {
+        "framework": "Full-Stack (Rails API + Next.js)",
+        "architecture": "Separate backend (Rails) and frontend (Next.js)",
+        "build_command": "npm run build && bundle install",
+        "test_command": "bundle exec rails test && npm test"
+      }
+    }
+  },
+
+  // =============================================================================
+  // KNOWN PROJECTS
+  // =============================================================================
+  // Pre-configured settings for specific projects Rafael works on
+  "projects": {
+    "erp_drkmattr": {
+      "path_patterns": [
+        "**/erp.drkmattr.com/**",
+        "**/erp/**",
+        "**/tires_erp/**"
+      ],
+      "name": "ERP System - DRKMATTR",
+      "type": "fullstack_rails_nextjs",
+      "tech_stack": ["Rails 7", "Next.js 14", "PostgreSQL", "TypeScript"],
+      "context": {
+        "domain": "Enterprise Resource Planning for tire/automotive business",
+        "features": ["Inventory management", "Sales tracking", "Customer relations", "Reporting"],
+        "database": "PostgreSQL",
+        "deployment": "Production on drkmattr.com"
+      },
+      "workflow": {
+        "branch_prefix": "feature",
+        "auto_build": true,
+        "auto_test": true,
+        "auto_pr": false,
+        "auto_merge": false,
+        "target_branch": "main"
+      }
+    },
+
+    "totalcargo": {
+      "path_patterns": [
+        "**/TotalCargo/**",
+        "**/totalcargo/**"
+      ],
+      "name": "TotalCargo Logistics Platform",
+      "type": "fullstack",
+      "tech_stack": ["Rails", "Next.js", "GPS Integration", "Real-time Dashboards"],
+      "context": {
+        "domain": "Logistics and fleet management",
+        "features": ["GPS tracking", "Route optimization", "Dashboard analytics", "Driver management"],
+        "integrations": ["GPS APIs", "Mapping services"]
+      },
+      "workflow": {
+        "branch_prefix": "feat",
+        "auto_build": true,
+        "auto_test": true,
+        "auto_pr": false,
+        "auto_merge": false,
+        "target_branch": "main"
+      }
+    }
+  },
+
+  // =============================================================================
+  // AUTOMATION WORKFLOWS
+  // =============================================================================
+  // Define automated workflows for different project types
+  "workflows": {
+    "nextjs_autobuild": {
+      "name": "Next.js Auto-Build and PR",
+      "description": "Build → Create Branch → Commit → Push → PR → Auto-merge",
+      "steps": [
+        {
+          "action": "build",
+          "command": "npm run build",
+          "on_failure": "stop"
+        },
+        {
+          "action": "create_branch",
+          "pattern": "feature/{timestamp}-autobuild",
+          "from": "main"
+        },
+        {
+          "action": "commit",
+          "message": "chore: automated build successful [{timestamp}]"
+        },
+        {
+          "action": "push",
+          "set_upstream": true
+        },
+        {
+          "action": "create_pr",
+          "title": "Automated Build PR - {timestamp}",
+          "body": "Automated PR created after successful build.\n\n**Changes:**\n- Build validated\n- All checks passed\n\n*Generated by Copilot CLI automation for Rafael Delgado*"
+        },
+        {
+          "action": "wait_for_checks",
+          "timeout": 300
+        },
+        {
+          "action": "merge_pr",
+          "method": "squash",
+          "delete_branch": true
+        }
+      ],
+      "enabled": false,
+      "requires_approval": true
+    },
+
+    "rails_automerge": {
+      "name": "Rails Test and Auto-merge",
+      "description": "Test → Create Branch → Commit → Push → PR → Auto-merge",
+      "steps": [
+        {
+          "action": "test",
+          "command": "bundle exec rails test",
+          "on_failure": "stop"
+        },
+        {
+          "action": "create_branch",
+          "pattern": "fix/{timestamp}-automerge",
+          "from": "main"
+        },
+        {
+          "action": "commit",
+          "message": "fix: automated test-driven merge [{timestamp}]"
+        },
+        {
+          "action": "push",
+          "set_upstream": true
+        },
+        {
+          "action": "create_pr",
+          "title": "Automated Test-Driven PR - {timestamp}",
+          "body": "Automated PR created after successful test suite.\n\n**Validation:**\n- All tests passed\n- Code quality checks completed\n\n*Generated by Copilot CLI automation for Rafael Delgado*"
+        },
+        {
+          "action": "wait_for_checks",
+          "timeout": 300
+        },
+        {
+          "action": "merge_pr",
+          "method": "squash",
+          "delete_branch": true
+        }
+      ],
+      "enabled": false,
+      "requires_approval": true
+    }
+  },
+
+  // =============================================================================
+  // BEHAVIOR SETTINGS
+  // =============================================================================
+  "behavior": {
+    // Persist context while in the same directory
+    "persist_context": true,
+    "context_timeout": 3600,
+
+    // Automatically load project-specific .copilot-rules.json if present
+    "load_local_config": true,
+    "local_config_filenames": [".copilot-rules.json", ".copilot-rules.yaml", ".copilot.json"],
+
+    // Safety features
+    "safety": {
+      "require_confirmation_for_destructive": true,
+      "prevent_force_push_to_main": true,
+      "backup_before_major_changes": true,
+      "dry_run_mode": false
+    },
+
+    // Logging and debugging
+    "logging": {
+      "enabled": true,
+      "log_file": "~/.copilot_cli.log",
+      "log_level": "info"
+    }
+  },
+
+  // =============================================================================
+  // EXTENSION SYSTEM
+  // =============================================================================
+  // Instructions for adding new projects
+  "extension_guide": {
+    "description": "To add a new project, create a .copilot-rules.json file in the project root",
+    "minimal_config_example": {
+      "project_name": "My New Project",
+      "type": "nextjs",
+      "tech_stack": ["Next.js", "TypeScript"],
+      "context": {
+        "domain": "E-commerce platform",
+        "features": ["Product catalog", "Shopping cart"]
+      },
+      "workflow": {
+        "branch_prefix": "feature",
+        "auto_build": true,
+        "target_branch": "main"
+      }
+    }
+  }
+}

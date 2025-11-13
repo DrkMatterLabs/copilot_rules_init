@@ -1,0 +1,49 @@
+{
+  "name": "@drkmattrlabs/copilot_init",
+  "version": "1.0.0",
+  "description": "Smart context management and automated workflows for GitHub Copilot CLI",
+  "main": "src/index.js",
+  "bin": {
+    "copilot-init": "./bin/copilot-init.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "chmod +x bin/copilot-init.js"
+  },
+  "keywords": [
+    "github",
+    "copilot",
+    "cli",
+    "automation",
+    "context",
+    "ai",
+    "developer-tools",
+    "workflow",
+    "nextjs",
+    "rails",
+    "fullstack"
+  ],
+  "author": "Rafael Delgado <DrkMatterLabs>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DrkMatterLabs/copilot_rules_init.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DrkMatterLabs/copilot_rules_init/issues"
+  },
+  "homepage": "https://github.com/DrkMatterLabs/copilot_rules_init#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  }
+}
