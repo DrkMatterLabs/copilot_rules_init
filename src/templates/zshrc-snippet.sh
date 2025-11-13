@@ -16,12 +16,11 @@ copilot_check_dir_change() {
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd copilot_check_dir_change
 
-# Aliases
-alias copilot='copilot_status'
+# Aliases (NOTE: 'copilot' is reserved for GitHub Copilot CLI)
 alias cstatus='copilot_status'
 alias crefresh='copilot_refresh'
-alias nextbuild='autobuild_next'
-alias railsmerge='automerge_rails'
+alias cnext='autobuild_next'
+alias crails='automerge_rails'
 
 # Safety: prevent force push to main
 git() {
